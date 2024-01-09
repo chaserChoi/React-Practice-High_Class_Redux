@@ -1,18 +1,26 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-import { uiActions } from "./ui-slice";
+// import { uiActions } from "./ui-slice";
 
 const cartSlice = createSlice({
     name: 'cart',
     initialState: {
         items: [],
         totalQuantity: 0,
+        // 439. 장바구니를 교체한 경우, 변경 X | 장바구니 항목 추가 or 제거한 경우, 변경 O
+        changed: false,
     },
     reducers: {
+        replaceCart(state, action) {
+            state.totalQuantity = action.payload.totalQuantity;
+            state.items = action.payload.items;
+        },
         addItemToCart(state, action) {
             const newItem = action.payload;
             const existingItem = state.items.find(item => item.id === newItem.id);
             state.totalQuantity++;
+            // 장바구니 변경
+            state.changed = true;
             if (!existingItem) {
                 state.items.push({
                     id: newItem.id, 
@@ -30,6 +38,8 @@ const cartSlice = createSlice({
             const id = action.payload;
             const existingItem = state.items.find(item => item.id === id);
             state.totalQuantity--;
+            // 장바구니 변경
+            state.changed = true;
             if (existingItem.quantity === 1) {
                 state.items = state.items.filter(item => item.id !== id);
             } else {
@@ -43,52 +53,52 @@ const cartSlice = createSlice({
 
 // 438. 액션 생성자 Thunk
 // Thunk : 다른 작업이 완료될 때까지 작업을 지연시키는 단순 함수
-export const sendCartData = (cart) => {
-    return async (dispatch) => {
-        dispatch(
-            uiActions.showNotification({
-                status: "sending",
-                title: "Sending...",
-                message: "Sending cart data!",
-            })
-        );
+// export const sendCartData = (cart) => {
+//     return async (dispatch) => {
+//         dispatch(
+//             uiActions.showNotification({
+//                 status: "sending",
+//                 title: "Sending...",
+//                 message: "Sending cart data!",
+//             })
+//         );
 
-        const sendRequest = async () => {
-            const response = await fetch(
-                "https://react-http-6b4e2-default-rtdb.firebaseio.com/cart.json",
-                {
-                    method: "PUT",
-                    body: JSON.stringify(cart),
-                }
-            );
+//         const sendRequest = async () => {
+//             const response = await fetch(
+//                 "https://react-http-6b4e2-default-rtdb.firebaseio.com/cart.json",
+//                 {
+//                     method: "PUT",
+//                     body: JSON.stringify(cart),
+//                 }
+//             );
 
-            // 응답 오류 발생
-            if (!response.ok) {
-                throw new Error("Sending cart data failed.");
-            }
-        };
+//             // 응답 오류 발생
+//             if (!response.ok) {
+//                 throw new Error("Sending cart data failed.");
+//             }
+//         };
 
-        try {
-            await sendRequest();
+//         try {
+//             await sendRequest();
 
-            dispatch(
-                uiActions.showNotification({
-                    status: "success",
-                    title: "Success!",
-                    message: "Sent cart data successfully!",
-                })
-            );
-        } catch (error) {
-            dispatch(
-                uiActions.showNotification({
-                    status: "error",
-                    title: "Error!",
-                    message: "Sending cart data failed!",
-                })
-            );
-        }
-    };
-};
+//             dispatch(
+//                 uiActions.showNotification({
+//                     status: "success",
+//                     title: "Success!",
+//                     message: "Sent cart data successfully!",
+//                 })
+//             );
+//         } catch (error) {
+//             dispatch(
+//                 uiActions.showNotification({
+//                     status: "error",
+//                     title: "Error!",
+//                     message: "Sending cart data failed!",
+//                 })
+//             );
+//         }
+//     };
+// };
 
 export const cartActions = cartSlice.actions;
 

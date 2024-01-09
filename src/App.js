@@ -6,7 +6,7 @@ import Layout from './components/Layout/Layout';
 import Products from './components/Shop/Products';
 // import { uiActions } from './store/ui-slice';
 import Notification from './components/UI/Notification';
-import { sendCartData } from './store/cart-slice';
+import { fetchCartData, sendCartData } from './store/cart-actions';
 
 let isInitial = true;
 
@@ -19,6 +19,10 @@ function App() {
   //  But, useEffect()의 문제점은 초기(즉, 비어 있는) 카트를 백엔드로 보내고 거기에 저장된 모든 데이터를 덮어쓰는 문제 발생!
   const cart = useSelector((state) => state.cart);
   const notification = useSelector((state) => state.ui.notification);
+
+  useEffect(() => {
+    dispatch(fetchCartData());
+  }, [dispatch]);
 
   useEffect(() => {
     // 437. 알림 Component와 현재 접근 방식과 함께 사용하기 위해 fetch, await(비동기) 방식 이용!
@@ -72,6 +76,10 @@ function App() {
     if (isInitial) {
       isInitial = false;
       return;
+    }
+
+    if (cart.changed) {
+      dispatch(sendCartData(cart));
     }
 
     // 438. Thunk를 사용하여 데이터 보내기

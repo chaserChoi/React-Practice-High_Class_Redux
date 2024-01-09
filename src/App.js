@@ -4,8 +4,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import Cart from './components/Cart/Cart';
 import Layout from './components/Layout/Layout';
 import Products from './components/Shop/Products';
-import { uiActions } from './store/ui-slice';
+// import { uiActions } from './store/ui-slice';
 import Notification from './components/UI/Notification';
+import { sendCartData } from './store/cart-slice';
 
 let isInitial = true;
 
@@ -21,50 +22,60 @@ function App() {
 
   useEffect(() => {
     // 437. 알림 Component와 현재 접근 방식과 함께 사용하기 위해 fetch, await(비동기) 방식 이용!
-    const sendCartData = async () => {
-      dispatch(
-        uiActions.showNotification({
-          status: "sending",
-          title: "Sending...",
-          message: "Sending cart data!",
-        })
-      );
-      
-      const response = await fetch("https://react-http-6b4e2-default-rtdb.firebaseio.com/cart.json", {
-        method: "PUT",
-        body: JSON.stringify(cart),
-      });
+    // const sendCartData = async () => {
+    //   dispatch(
+    //     uiActions.showNotification({
+    //       status: "sending",
+    //       title: "Sending...",
+    //       message: "Sending cart data!",
+    //     })
+    //   );
 
-      // 응답 오류 발생
-      if (!response.ok) {
-        throw new Error("Sending cart data failed.");
-      }
+    //   const response = await fetch(
+    //     "https://react-http-6b4e2-default-rtdb.firebaseio.com/cart.json",
+    //     {
+    //       method: "PUT",
+    //       body: JSON.stringify(cart),
+    //     }
+    //   );
 
-      // 응답 성공
-      dispatch(
-        uiActions.showNotification({
-          status: "success",
-          title: "Success!",
-          message: "Sent cart data successfully!",
-        })
-      );
-    };
+    //   if (!response.ok) {
+    //     throw new Error("Sending cart data failed.");
+    //   }
+
+    // 응답 성공
+    //   dispatch(
+    //     uiActions.showNotification({
+    //       status: "success",
+    //       title: "Success!",
+    //       message: "Sent cart data successfully!",
+    //     })
+    //   );
+    // };
 
     // 437. 효과가 처음 실행될 때, 데이터를 보내지 않도록 하기 위해 isInitial 전역 변수 사용
+    // if (isInitial) {
+    //   isInitial = false;
+    //   return;
+    // }
+
+    // sendCartData().catch((error) => {
+    //   dispatch(
+    //     uiActions.showNotification({
+    //       status: "error",
+    //       title: "Error!",
+    //       message: "Sending cart data failed!",
+    //     })
+    //   );
+    // });
+
     if (isInitial) {
       isInitial = false;
       return;
     }
 
-    sendCartData().catch((error) => {
-      dispatch(
-        uiActions.showNotification({
-          status: "error",
-          title: "Error!",
-          message: "Sending cart data failed!",
-        })
-      );
-    });
+    // 438. Thunk를 사용하여 데이터 보내기
+    dispatch(sendCartData(cart));
   }, [cart, dispatch]);
 
   return (
